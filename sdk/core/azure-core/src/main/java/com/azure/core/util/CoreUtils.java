@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -181,7 +182,9 @@ public final class CoreUtils {
      * @param content The function which fetches items from the next page.
      * @param <T> The type of the item being returned by the paged response.
      * @return The publisher holding all the generic items combined.
+     * @deprecated Use localized implementation.
      */
+    @Deprecated
     public static <T> Publisher<T> extractAndFetch(PagedResponse<T> page, Context context,
         BiFunction<String, Context, Publisher<T>> content) {
         String nextPageLink = page.getContinuationToken();
@@ -348,5 +351,29 @@ public final class CoreUtils {
                 defaultTimeout, ex);
             return defaultTimeout;
         }
+    }
+
+    /**
+     * Merges two {@link Context Contexts} into a new {@link Context}.
+     *
+     * @param into Context being merged into.
+     * @param from Context being merged.
+     * @return A new Context that is the merged Contexts.
+     * @throws NullPointerException If either {@code into} or {@code from} is null.
+     */
+    public static Context mergeContexts(Context into, Context from) {
+        Objects.requireNonNull(into, "'into' cannot be null.");
+        Objects.requireNonNull(from, "'from' cannot be null.");
+
+        Context[] contextChain = from.getContextChain();
+
+        Context returnContext = into;
+        for (Context toAdd : contextChain) {
+            if (toAdd != null) {
+                returnContext = returnContext.addData(toAdd.getKey(), toAdd.getValue());
+            }
+        }
+
+        return returnContext;
     }
 }
