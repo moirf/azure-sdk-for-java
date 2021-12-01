@@ -53,7 +53,7 @@ public class CallingServerTestBase extends TestBase {
 
     protected static final String AZURE_TENANT_ID = Configuration.getGlobalConfiguration()
         .get("COMMUNICATION_LIVETEST_STATIC_RESOURCE_IDENTIFIER",
-            "016a7064-0581-40b9-be73-6dde64d69d72");
+            "ab12b0ea-85ea-4f83-b0b6-84d90209c7c4");
 
     protected static final String FROM_PHONE_NUMBER = Configuration.getGlobalConfiguration()
         .get("ALTERNATE_CALLERID", "+15551234567");

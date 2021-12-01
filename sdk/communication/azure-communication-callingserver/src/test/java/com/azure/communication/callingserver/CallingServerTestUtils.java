@@ -9,10 +9,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 import com.azure.communication.callingserver.models.AddParticipantResult;
+import com.azure.communication.callingserver.models.CallParticipant;
 import com.azure.communication.callingserver.models.CallingOperationStatus;
 import com.azure.communication.callingserver.models.PlayAudioResult;
 import com.azure.core.http.rest.Response;
 import org.junit.jupiter.api.Assertions;
+
+import java.util.List;
 
 public class CallingServerTestUtils {
     protected static void validateCallConnectionResponse(Response<CallConnection> callConnectionResponse) {
@@ -86,5 +89,24 @@ public class CallingServerTestUtils {
         assertNotNull(result);
         assertNotNull(result.getParticipantId());
         assertFalse(result.getParticipantId().isEmpty());
+    }
+
+    protected static void validateGetParticipantResponse(Response<CallParticipant> response) {
+        assertNotNull(response);
+        Assertions.assertEquals(200, response.getStatusCode());
+        assertNotNull(response.getValue().getParticipantId());
+        assertFalse(response.getValue().getParticipantId().isEmpty());
+        assertNotNull(response.getValue());
+    }
+
+    protected static void validateGetParticipantsResponse(Response<List<CallParticipant>> response) {
+        assertNotNull(response);
+        Assertions.assertEquals(200, response.getStatusCode());
+        assertNotNull(response.getValue());
+    }
+
+    protected static void validateApiResponse(Response<Void> response) {
+        assertNotNull(response);
+        Assertions.assertEquals(200, response.getStatusCode());
     }
 }
