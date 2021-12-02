@@ -14,6 +14,7 @@ import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.URI;
@@ -484,6 +485,204 @@ public class CallConnectionLiveTests extends CallingServerTestBase {
             // Hang up
             Response<Void> hangupResponse = callConnection.hangupWithResponse(null);
             CallingServerTestUtils.validateResponse(hangupResponse);
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("com.azure.core.test.TestBase#getHttpClients")
+    @DisabledIfEnvironmentVariable(
+        named = "SKIP_LIVE_TEST",
+        matches = "(?i)(true)",
+        disabledReason = "Requires human intervention")
+    public void runCreateAddHoldResumeRemoveHangupScenario(HttpClient httpClient) {
+        CallingServerClientBuilder builder = getCallingServerClientUsingConnectionString(httpClient);
+        CallingServerClient callingServerClient = setupClient(builder, "runCreateAddHoldResumeRemoveHangupScenario");
+
+        // Establish a call
+        CreateCallOptions options = new CreateCallOptions(
+            URI.create(CALLBACK_URI),
+            Collections.singletonList(CallMediaType.AUDIO),
+            Collections.singletonList(CallingEventSubscriptionType.PARTICIPANTS_UPDATED));
+
+        options.setAlternateCallerId(new PhoneNumberIdentifier(FROM_PHONE_NUMBER));
+
+        CallConnection callConnection = callingServerClient.createCallConnection(
+            new CommunicationUserIdentifier(fromUser),
+            Collections.singletonList(new PhoneNumberIdentifier(TO_PHONE_NUMBER)),
+            options);
+
+        CallingServerTestUtils.validateCallConnection(callConnection);
+
+        try {
+            // Add User
+            String operationContext = UUID.randomUUID().toString();
+            CommunicationUserIdentifier addUser = new CommunicationUserIdentifier("8:acs:" + AZURE_TENANT_ID + "_" + "0000000e-194d-2729-3ef0-8b3a0d0050e6");
+            AddParticipantResult addParticipantResult = callConnection.addParticipant(addUser, null, operationContext);
+            assert addParticipantResult != null;
+            // Hold User
+            callConnection.holdParticipantMeetingAudio(addUser);  
+            // Resume User
+            callConnection.resumeParticipantMeetingAudio(addUser);
+            // Remove User
+            callConnection.removeParticipant(addUser);
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+            throw e;
+        } finally {
+            // Hang up
+            callConnection.hangup();
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("com.azure.core.test.TestBase#getHttpClients")
+    @DisabledIfEnvironmentVariable(
+        named = "SKIP_LIVE_TEST",
+        matches = "(?i)(true)",
+        disabledReason = "Requires human intervention")
+    public void runCreateAddHoldResumeRemoveHangupScenarioWithResponse(HttpClient httpClient) {
+        CallingServerClientBuilder builder = getCallingServerClientUsingConnectionString(httpClient);
+        CallingServerClient callingServerClient =
+            setupClient(builder, "runCreateAddHoldResumeRemoveHangupScenarioWithResponse");
+
+        // Establish a call
+        CreateCallOptions options = new CreateCallOptions(
+            URI.create(CALLBACK_URI),
+            Collections.singletonList(CallMediaType.AUDIO),
+            Collections.singletonList(CallingEventSubscriptionType.PARTICIPANTS_UPDATED));
+
+        options.setAlternateCallerId(new PhoneNumberIdentifier(FROM_PHONE_NUMBER));
+
+        Response<CallConnection> callConnectionResponse =
+            callingServerClient.createCallConnectionWithResponse(
+                new CommunicationUserIdentifier(fromUser),
+                Collections.singletonList(new PhoneNumberIdentifier(TO_PHONE_NUMBER)),
+                options,
+                null);
+
+        CallingServerTestUtils.validateCallConnectionResponse(callConnectionResponse);
+        CallConnection callConnection = callConnectionResponse.getValue();
+
+        try {
+            // Add User
+            String operationContext = UUID.randomUUID().toString();
+            CommunicationUserIdentifier addUser = new CommunicationUserIdentifier("8:acs:" + AZURE_TENANT_ID + "_" + "0000000e-194d-2729-3ef0-8b3a0d0050e6");
+            Response<AddParticipantResult> addParticipantResponse = callConnection
+                .addParticipantWithResponse(
+                    addUser,
+                    null,
+                    operationContext,
+                    Context.NONE);
+            CallingServerTestUtils.validateAddParticipantResponse(addParticipantResponse);
+
+            // Get Call
+            Response<CallConnectionProperties> getCallResponse =
+                callConnection.getCallWithResponse(null);
+            assertEquals(getCallResponse.getValue().getCallConnectionId(), callConnection.getCallConnectionId());
+            CallingServerTestUtils.validateGetCallResponse(getCallResponse);
+
+            // Hold User
+            Response<Void> holdParticipantResponse =
+                callConnection.holdParticipantMeetingAudioWithResponse(addUser, null);
+            CallingServerTestUtils.validateApiResponse(holdParticipantResponse);
+
+            // Resume User
+            Response<Void> resumeParticipantResponse = 
+                callConnection.resumeParticipantMeetingAudioWithResponse(addUser, null);
+            CallingServerTestUtils.validateApiResponse(resumeParticipantResponse);
+
+            // Remove User
+            Response<Void> removeParticipantResponse =
+                callConnection.removeParticipantWithResponse(addUser, null);
+            CallingServerTestUtils.validateResponse(removeParticipantResponse);
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+            throw e;
+        } finally {
+            // Hang up
+            Response<Void> hangupResponse = callConnection.hangupWithResponse(null);
+            CallingServerTestUtils.validateResponse(hangupResponse);
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("com.azure.core.test.TestBase#getHttpClients")
+    @DisabledIfEnvironmentVariable(
+        named = "SKIP_LIVE_TEST",
+        matches = "(?i)(true)",
+        disabledReason = "Requires human intervention")
+    public void runCreateKeepAliveDeleteCallScenario(HttpClient httpClient) {
+        CallingServerClientBuilder builder = getCallingServerClientUsingConnectionString(httpClient);
+        CallingServerClient callingServerClient = setupClient(builder, "runCreateKeepAliveDeleteCallScenario");
+
+        // Establish a call
+        CreateCallOptions options = new CreateCallOptions(
+            URI.create(CALLBACK_URI),
+            Collections.singletonList(CallMediaType.AUDIO),
+            Collections.singletonList(CallingEventSubscriptionType.PARTICIPANTS_UPDATED));
+
+        options.setAlternateCallerId(new PhoneNumberIdentifier(FROM_PHONE_NUMBER));
+
+        CallConnection callConnection = callingServerClient.createCallConnection(
+            new CommunicationUserIdentifier(fromUser),
+            Collections.singletonList(new PhoneNumberIdentifier(TO_PHONE_NUMBER)),
+            options);
+
+        CallingServerTestUtils.validateCallConnection(callConnection);
+
+        try {
+            // Keep Call Alive
+            callConnection.keepAlive();
+            // Delete Call
+            callConnection.delete();
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+            throw e;
+        } 
+    }
+
+    @ParameterizedTest
+    @MethodSource("com.azure.core.test.TestBase#getHttpClients")
+    @DisabledIfEnvironmentVariable(
+        named = "SKIP_LIVE_TEST",
+        matches = "(?i)(true)",
+        disabledReason = "Requires human intervention")
+    public void runCreateKeepAliveDeleteCallScenarioWithResponse(HttpClient httpClient) {
+        CallingServerClientBuilder builder = getCallingServerClientUsingConnectionString(httpClient);
+        CallingServerClient callingServerClient =
+            setupClient(builder, "runCreateKeepAliveDeleteCallScenariooWithResponse");
+
+        // Establish a call
+        CreateCallOptions options = new CreateCallOptions(
+            URI.create(CALLBACK_URI),
+            Collections.singletonList(CallMediaType.AUDIO),
+            Collections.singletonList(CallingEventSubscriptionType.PARTICIPANTS_UPDATED));
+
+        options.setAlternateCallerId(new PhoneNumberIdentifier(FROM_PHONE_NUMBER));
+
+        Response<CallConnection> callConnectionResponse =
+            callingServerClient.createCallConnectionWithResponse(
+                new CommunicationUserIdentifier(fromUser),
+                Collections.singletonList(new PhoneNumberIdentifier(TO_PHONE_NUMBER)),
+                options,
+                null);
+
+        CallingServerTestUtils.validateCallConnectionResponse(callConnectionResponse);
+        CallConnection callConnection = callConnectionResponse.getValue();
+
+        try {
+            // Keep Call Alive
+            Response<Void> keepAliveResponse =
+                callConnection.keepAliveWithResponse(null);
+            CallingServerTestUtils.validateApiResponse(keepAliveResponse);
+
+            // Delete Call
+            Response<Void> deleteCallResponse = 
+                callConnection.deleteWithResponse(null);
+            CallingServerTestUtils.validateResponse(deleteCallResponse);
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+            throw e;
         }
     }
 

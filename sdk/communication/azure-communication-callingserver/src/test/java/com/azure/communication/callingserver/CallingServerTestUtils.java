@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 import com.azure.communication.callingserver.models.AddParticipantResult;
+import com.azure.communication.callingserver.models.CallConnectionProperties;
 import com.azure.communication.callingserver.models.CallParticipant;
 import com.azure.communication.callingserver.models.CallingOperationStatus;
 import com.azure.communication.callingserver.models.PlayAudioResult;
@@ -107,6 +108,14 @@ public class CallingServerTestUtils {
 
     protected static void validateApiResponse(Response<Void> response) {
         assertNotNull(response);
+        Assertions.assertEquals(200, response.getStatusCode());
+    }
+
+    protected static void validateGetCallResponse(Response<CallConnectionProperties> response) {
+        assertNotNull(response);
+        assertNotNull(response.getValue());
+        assertNotNull(response.getValue().getCallConnectionId());
+        assertFalse(response.getValue().getCallConnectionId().isEmpty());
         Assertions.assertEquals(200, response.getStatusCode());
     }
 }
