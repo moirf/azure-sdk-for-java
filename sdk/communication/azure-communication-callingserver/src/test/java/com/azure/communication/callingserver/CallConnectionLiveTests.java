@@ -891,7 +891,7 @@ public class CallConnectionLiveTests extends CallingServerTestBase {
             PlayAudioOptions playAudioOptions = new PlayAudioOptions()
                 .setAudioFileId(UUID.randomUUID().toString())
                 .setCallbackUri(URI.create(CALLBACK_URI))
-                .setLoop(false)
+                .setLoop(true)
                 .setOperationContext(playAudioOperationContext);
             PlayAudioResult playAudioResult = callConnection.playAudioToParticipant(
                 addUser, URI.create(AUDIO_FILE_URI), playAudioOptions);
@@ -950,6 +950,22 @@ public class CallConnectionLiveTests extends CallingServerTestBase {
                     operationContext,
                     Context.NONE);
             CallingServerTestUtils.validateAddParticipantResponse(addParticipantResponse);
+            
+            // Play Audio
+            String playAudioOperationContext = UUID.randomUUID().toString();
+            PlayAudioOptions playAudioOptions =
+                new PlayAudioOptions()
+                    .setLoop(true)
+                    .setAudioFileId(UUID.randomUUID().toString())
+                    .setCallbackUri(URI.create(CALLBACK_URI))
+                    .setOperationContext(playAudioOperationContext);
+            Response<PlayAudioResult> playAudioResult =
+                callConnection.playAudioToParticipantWithResponse(addUser, URI.create(AUDIO_FILE_URI), playAudioOptions, null);
+            CallingServerTestUtils.validatePlayAudioResponse(playAudioResult);
+            String mediaOperationId = playAudioResult.getValue().getOperationId();
+
+            // Cancel All Media Operations
+            callConnection.cancelParticipantMediaOperationWithResponse(addUser, mediaOperationId, null);
 
             // Remove User
             Response<Void> removeParticipantResponse =
