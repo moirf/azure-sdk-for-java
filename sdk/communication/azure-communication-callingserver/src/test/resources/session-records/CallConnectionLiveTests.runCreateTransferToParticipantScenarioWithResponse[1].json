@@ -1,0 +1,46 @@
+{
+  "networkCallRecords" : [ {
+    "Method" : "POST",
+    "Uri" : "https://REDACTED.communication.azure.com/calling/callConnections?api-version=2021-11-15-preview",
+    "Headers" : {
+      "User-Agent" : "azsdk-java-azure-communication-callingserver/1.0.0-beta.4 (11.0.12; Windows 10; 10.0)",
+      "x-ms-client-request-id" : "3a398cef-c04a-46c5-a5bc-fcd913e3bcad",
+      "Content-Type" : "application/json"
+    },
+    "Response" : {
+      "X-Cache" : "CONFIG_NOCACHE",
+      "content-length" : "59",
+      "retry-after" : "0",
+      "X-Azure-Ref" : "0FAGqYQAAAACiWZtYCkh8RLhUcouBziITU0xBRURHRTA5MTcAOWZjN2I1MTktYThjYy00Zjg5LTkzNWUtYzkxNDhhZTA5ZTgx",
+      "StatusCode" : "201",
+      "X-Microsoft-Skype-Chain-ID" : "a6b45f38-dd8c-4edc-b0ce-54ec08c57313",
+      "Body" : "{\"callConnectionId\":\"9d201300-8918-492e-b6a8-c554a0efe29d\"}",
+      "x-ms-client-request-id" : "3a398cef-c04a-46c5-a5bc-fcd913e3bcad",
+      "Date" : "Fri, 03 Dec 2021 11:35:49 GMT",
+      "Content-Type" : "application/json; charset=utf-8"
+    },
+    "Exception" : null
+  }, {
+    "Method" : "POST",
+    "Uri" : "https://REDACTED.communication.azure.com/calling/callConnections/9d201300-8918-492e-b6a8-c554a0efe29d/:transferToParticipant?api-version=2021-11-15-preview",
+    "Headers" : {
+      "User-Agent" : "azsdk-java-azure-communication-callingserver/1.0.0-beta.4 (11.0.12; Windows 10; 10.0)",
+      "x-ms-client-request-id" : "8aee9fa3-dcaf-467d-91a8-050b95b9612f",
+      "Content-Type" : "application/json"
+    },
+    "Response" : {
+      "X-Cache" : "CONFIG_NOCACHE",
+      "content-length" : "73",
+      "retry-after" : "0",
+      "X-Azure-Ref" : "0KQGqYQAAAAAb+2/a5EHLRY/Hhg50s6lWU0xBRURHRTA5MTcAOWZjN2I1MTktYThjYy00Zjg5LTkzNWUtYzkxNDhhZTA5ZTgx",
+      "StatusCode" : "202",
+      "X-Microsoft-Skype-Chain-ID" : "4d72b697-84ff-4626-97e0-9da000b6d3e0",
+      "Body" : "{\"operationId\":\"9d201300-8918-492e-b6a8-c554a0efe29d\",\"status\":\"running\"}",
+      "x-ms-client-request-id" : "8aee9fa3-dcaf-467d-91a8-050b95b9612f",
+      "Date" : "Fri, 03 Dec 2021 11:36:09 GMT",
+      "Content-Type" : "application/json; charset=utf-8"
+    },
+    "Exception" : null
+  } ],
+  "variables" : [ ]
+}
