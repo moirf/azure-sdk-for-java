@@ -105,6 +105,10 @@ public class CallingServerTestBase extends TestBase {
         return "8:acs:" + AZURE_TENANT_ID + "_" + UUID.randomUUID();
     }
 
+    protected String getUserId() {
+        return "8:acs:" + AZURE_TENANT_ID + "_" + "0000000e-d427-d159-defd-8b3a0d003278";
+    }
+
     protected String getGroupId(String testName) {
         /*
           If tests are running in live mode, we want them to all

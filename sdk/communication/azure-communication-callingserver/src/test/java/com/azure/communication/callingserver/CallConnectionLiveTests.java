@@ -14,8 +14,11 @@ import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.net.URI;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 public class CallConnectionLiveTests extends CallingServerTestBase {
@@ -346,6 +349,143 @@ public class CallConnectionLiveTests extends CallingServerTestBase {
         }
     }
 
+    @ParameterizedTest
+    @MethodSource("com.azure.core.test.TestBase#getHttpClients")
+    @DisabledIfEnvironmentVariable(
+        named = "SKIP_LIVE_TEST",
+        matches = "(?i)(true)",
+        disabledReason = "Requires human intervention")
+    public void runCreateAddMuteUnmuteGetParticipantRemoveHangupScenario(HttpClient httpClient) {
+        CallingServerClientBuilder builder = getCallingServerClientUsingConnectionString(httpClient);
+        CallingServerClient callingServerClient = setupClient(builder, "runCreateAddMuteUnmuteGetParticipantRemoveHangupScenario");
+
+        // Establish a call
+        CreateCallOptions options = new CreateCallOptions(
+            URI.create(CALLBACK_URI),
+            Collections.singletonList(CallMediaType.AUDIO),
+            Collections.singletonList(CallingEventSubscriptionType.PARTICIPANTS_UPDATED));
+
+        options.setAlternateCallerId(new PhoneNumberIdentifier(FROM_PHONE_NUMBER));
+
+        CallConnection callConnection = callingServerClient.createCallConnection(
+            new CommunicationUserIdentifier(fromUser),
+            Collections.singletonList(new PhoneNumberIdentifier(TO_PHONE_NUMBER)),
+            options);
+
+        CallingServerTestUtils.validateCallConnection(callConnection);
+
+        try {
+            // Add User
+            String operationContext = UUID.randomUUID().toString();
+            CommunicationUserIdentifier addUser = new CommunicationUserIdentifier(getUserId());
+            AddParticipantResult addParticipantResult = callConnection.addParticipant(addUser, null, operationContext);
+            assert addParticipantResult != null;
+            // Mute User
+            callConnection.muteParticipant(addUser);
+            // Get User
+            var getMutedParticipantresult = callConnection.getParticipant(addUser);
+            assertTrue(getMutedParticipantresult.isMuted() == true);
+            // Unmute User
+            callConnection.unmuteParticipant(addUser);
+            // Get User
+            var getUnmutedParticipantresult = callConnection.getParticipant(addUser);
+            assertTrue(getUnmutedParticipantresult.isMuted() == false);
+            // Get Users
+            var getParticipantsResult = callConnection.getParticipants();
+            assertTrue(getParticipantsResult.size()>2);
+            // Remove User
+            callConnection.removeParticipant(addUser);
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+            throw e;
+        } finally {
+            // Hang up
+            callConnection.hangup();
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("com.azure.core.test.TestBase#getHttpClients")
+    @DisabledIfEnvironmentVariable(
+        named = "SKIP_LIVE_TEST",
+        matches = "(?i)(true)",
+        disabledReason = "Requires human intervention")
+    public void runCreateAddMuteUnmuteGetParticipantRemoveHangupScenarioWithResponse(HttpClient httpClient) {
+        CallingServerClientBuilder builder = getCallingServerClientUsingConnectionString(httpClient);
+        CallingServerClient callingServerClient =
+            setupClient(builder, "runCreateAddMuteUnmuteGetParticipantRemoveHangupScenarioWithResponse");
+
+        // Establish a call
+        CreateCallOptions options = new CreateCallOptions(
+            URI.create(CALLBACK_URI),
+            Collections.singletonList(CallMediaType.AUDIO),
+            Collections.singletonList(CallingEventSubscriptionType.PARTICIPANTS_UPDATED));
+
+        options.setAlternateCallerId(new PhoneNumberIdentifier(FROM_PHONE_NUMBER));
+
+        Response<CallConnection> callConnectionResponse =
+            callingServerClient.createCallConnectionWithResponse(
+                new CommunicationUserIdentifier(fromUser),
+                Collections.singletonList(new PhoneNumberIdentifier(TO_PHONE_NUMBER)),
+                options,
+                null);
+
+        CallingServerTestUtils.validateCallConnectionResponse(callConnectionResponse);
+        CallConnection callConnection = callConnectionResponse.getValue();
+
+        try {
+            // Add User
+            String operationContext = UUID.randomUUID().toString();
+            CommunicationUserIdentifier addUser = new CommunicationUserIdentifier(getUserId());
+            Response<AddParticipantResult> addParticipantResponse = callConnection
+                .addParticipantWithResponse(
+                    addUser,
+                    null,
+                    operationContext,
+                    Context.NONE);
+            CallingServerTestUtils.validateAddParticipantResponse(addParticipantResponse);
+            
+            // Mute User
+            Response<Void> muteParticipantResponse =
+                callConnection.muteParticipantWithResponse(addUser, null);
+            CallingServerTestUtils.validateApiResponse(muteParticipantResponse);
+
+            // Get User
+            Response<CallParticipant> getMutedParticipantresponse =
+                callConnection.getParticipantWithResponse(addUser, null);
+            assertTrue(getMutedParticipantresponse.getValue().isMuted() == true);
+            CallingServerTestUtils.validateGetParticipantResponse(getMutedParticipantresponse);
+
+            // Unmute User
+            Response<Void> unmuteParticipantResponse = 
+                callConnection.unmuteParticipantWithResponse(addUser, null);
+            CallingServerTestUtils.validateApiResponse(unmuteParticipantResponse);
+
+            // Get User
+            Response<CallParticipant> getUnmutedParticipantresponse =
+                callConnection.getParticipantWithResponse(addUser, null);
+            assertTrue(getUnmutedParticipantresponse.getValue().isMuted() == false);
+            CallingServerTestUtils.validateGetParticipantResponse(getUnmutedParticipantresponse);
+
+            // Get Users
+            Response<List<CallParticipant>> getParticipantsResponse = 
+                callConnection.getParticipantsWithResponse(null);
+            assertTrue(getParticipantsResponse.getValue().size()>2);
+            CallingServerTestUtils.validateGetParticipantsResponse(getParticipantsResponse);
+
+            // Remove User
+            Response<Void> removeParticipantResponse =
+                callConnection.removeParticipantWithResponse(addUser, null);
+            CallingServerTestUtils.validateResponse(removeParticipantResponse);
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+            throw e;
+        } finally {
+            // Hang up
+            Response<Void> hangupResponse = callConnection.hangupWithResponse(null);
+            CallingServerTestUtils.validateResponse(hangupResponse);
+        }
+    }
     private CallingServerClient setupClient(CallingServerClientBuilder builder, String testName) {
         return addLoggingPolicy(builder, testName).buildClient();
     }
