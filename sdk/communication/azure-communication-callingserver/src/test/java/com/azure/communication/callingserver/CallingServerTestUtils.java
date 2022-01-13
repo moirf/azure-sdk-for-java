@@ -14,6 +14,7 @@ import com.azure.communication.callingserver.models.CallingOperationStatus;
 import com.azure.communication.callingserver.models.PlayAudioResult;
 import com.azure.communication.callingserver.models.CallConnectionProperties;
 import com.azure.communication.callingserver.models.TransferCallResult;
+import com.azure.communication.callingserver.models.AudioGroupResult;
 import com.azure.core.http.rest.Response;
 import org.junit.jupiter.api.Assertions;
 
@@ -125,5 +126,16 @@ public class CallingServerTestUtils {
         Assertions.assertEquals(202, response.getStatusCode());
         assertNotNull(response.getValue());
         assertEquals(CallingOperationStatus.RUNNING, response.getValue().getStatus());
+    }
+
+    protected static void validateAudioGroupResult(AudioGroupResult audioGroupResponse) {
+        assertNotNull(audioGroupResponse);
+        assertNotNull(audioGroupResponse.getAudioRoutingMode());
+    }
+
+    protected static void validateAudioGroupResponse(Response<AudioGroupResult> audioGroupResponse) {
+        assertNotNull(audioGroupResponse);
+        assertNotNull(audioGroupResponse.getValue());
+        assertNotNull(audioGroupResponse.getValue().getAudioRoutingMode());
     }
 }

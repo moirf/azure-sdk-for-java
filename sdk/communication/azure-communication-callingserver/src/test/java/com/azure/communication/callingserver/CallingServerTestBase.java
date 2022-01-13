@@ -41,7 +41,11 @@ import com.azure.core.http.HttpResponse;
 public class CallingServerTestBase extends TestBase {
     protected static final TestMode TEST_MODE = initializeTestMode();
 
-    protected static final String USER_IDENTIFIER = "0000000e-edf3-d64f-80f5-8b3a0d006389";
+    protected static final String USER_IDENTIFIER = "0000000e-f19d-d6fd-7bfa-553a0d00d316";
+
+    protected static final String ANOTHER_USER_IDENTIFIER = "0000000e-f2c3-ce77-655d-573a0d00fafc";
+
+    protected static final String TARGET_CALL_CONNECTION_ID = "41201300-4316-4094-b8f0-a2238937273b";
 
     protected static final String CONNECTION_STRING = Configuration.getGlobalConfiguration()
         .get("COMMUNICATION_LIVETEST_STATIC_CONNECTION_STRING",
@@ -109,6 +113,10 @@ public class CallingServerTestBase extends TestBase {
 
     protected String getUserId(String userGuid) {
         return "8:acs:" + AZURE_TENANT_ID + "_" + userGuid;
+    }
+
+    protected String getTargetCallConnectionId() {
+        return TARGET_CALL_CONNECTION_ID;
     }
 
     protected String getGroupId(String testName) {
